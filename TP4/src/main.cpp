@@ -1,4 +1,5 @@
-#include <highgui.h>
+#include <highgui/highgui.hpp>
+#include <imgproc/imgproc.hpp>
 #include <iostream>
 
 #include "tp4.h"
@@ -84,23 +85,29 @@ Mat filtrage(Mat imageSource, TypeFiltre typeFiltre, int tailleFiltre)
     /* retourne une image filtree a partir du type de filtre et de la taille du filtre en entree */
 
     Mat imgDest(imageSource.rows, imageSource.cols, CV_8U);
+    Mat kernel;
+    int sigmaFiltreGaussien = 5;
 
     switch(typeFiltre)
     {
         case FMOYEN :
-            for(int i = 0; i < imageSource.rows; i++)
-            {
-                for(int j = 0; j < imageSource.cols; j++)
-                {
-                    imgDest.at<uchar>(i,j) = moyenneDuFiltre(imageSource, i, j, tailleFiltre);
-                }
-            }
+            kernel = Mat::ones(tailleFiltre, tailleFiltre, CV_32F) / (float)(tailleFiltre * tailleFiltre); // creation du kernel. Matrice avec 1 partout et coeff devant
+            filter2D(imageSource, imgDest, -1, kernel, Point(-1,-1), 0, BORDER_DEFAULT); // application du kernel
+        break;
+
+        case FMEDIAN :
+            medianBlur(imageSource, imgDest, tailleFiltre); // application du filtre directement
+        break;
+
+        case FGAUSSIEN :
+           GaussianBlur(imageSource, imgDest, Size(tailleFiltre, tailleFiltre), sigmaFiltreGaussien, 0, BORDER_DEFAULT); // application du filtre directement
         break;
     }
     
     return imgDest;
 }
 
+// pas utilise
 float moyenneDuFiltre(Mat imageSource, int ordonnee, int abscisse, int tailleFiltre)
 {
     /* retourne la moyenne des pixels appartenant a la fenetre du filtre centre sur le pixel (ordonnee, abscisse) */
@@ -131,6 +138,36 @@ float moyenneDuFiltre(Mat imageSource, int ordonnee, int abscisse, int tailleFil
     return somme / compteurPixel;
 }
 
+// pas utilise
+float medianeDuFiltre(Mat imageSource, int ordonnee, int abscisse, int tailleFiltre)
+{
+    /* retourne la valeur mediane des pixels appartenant a la fenetre du filtre centre sur le pixel (ordonnee, abscisse) */
+
+    int somme = 0;
+    int compteurPixel = 0;
+
+    int ordonneeDepart = ordonnee - (tailleFiltre-1) / 2;
+    int ordonneeArrivee = ordonnee + (tailleFiltre-1) / 2;
+    int abscisseDepart = abscisse - (tailleFiltre-1) / 2;
+    int abscisseArrivee = abscisse + (tailleFiltre-1) / 2;
+
+    for(int i = ordonneeDepart; i < ordonneeArrivee; i++)
+    {
+        if(0 <= i && i < imageSource.rows)
+        {
+            for(int j = abscisseDepart; j < abscisseArrivee; j++)
+            {
+                if( 0 <= j && j < imageSource.cols)
+                {
+                    
+                }
+            }
+        }
+    }
+
+    return somme / compteurPixel;
+}
+
 int main(int argc, char** argv)
 {
     
@@ -152,7 +189,7 @@ int main(int argc, char** argv)
     Mat imageBruitUniformeFiltreMedian;
     Mat imageBruitUniformeFiltreGaussien;
 
-    int tailleFiltreGaussien = 3;
+    int tailleFiltre = 3; // nombre impair obligatoire
 
     srand (time(NULL));
 
@@ -169,9 +206,19 @@ int main(int argc, char** argv)
     imageBruitUniforme = generateurDeBruit(imageSource, UNIFORME, 0);
 
     // filtrage a l'aide d'un filtre moyenneur
-    imageBruitGaussienFiltreMoyen = filtrage(imageBruitGaussien, FMOYEN, tailleFiltreGaussien);
-    imageBruitPoivreSelFiltreMoyen = filtrage(imageBruitPoivreSel, FMOYEN, tailleFiltreGaussien);
-    imageBruitUniformeFiltreMoyen = filtrage(imageBruitUniforme, FMOYEN, tailleFiltreGaussien);
+    imageBruitGaussienFiltreMoyen = filtrage(imageBruitGaussien, FMOYEN, tailleFiltre);
+    imageBruitPoivreSelFiltreMoyen = filtrage(imageBruitPoivreSel, FMOYEN, tailleFiltre);
+    imageBruitUniformeFiltreMoyen = filtrage(imageBruitUniforme, FMOYEN, tailleFiltre);
+
+    // filtrage a l'aide d'un filtre median
+    imageBruitGaussienFiltreMedian = filtrage(imageBruitGaussien, FMEDIAN, tailleFiltre);
+    imageBruitPoivreSelFiltreMedian = filtrage(imageBruitPoivreSel, FMEDIAN, tailleFiltre);
+    imageBruitUniformeFiltreMedian = filtrage(imageBruitUniforme, FMEDIAN, tailleFiltre);
+
+    //filtrage a l'aide d'un filtre gaussien
+    imageBruitGaussienFiltreGaussien = filtrage(imageBruitGaussien, FGAUSSIEN, tailleFiltre);
+    imageBruitPoivreSelFiltreGaussien = filtrage(imageBruitPoivreSel, FGAUSSIEN, tailleFiltre);
+    imageBruitUniformeFiltreGaussien = filtrage(imageBruitUniforme, FGAUSSIEN, tailleFiltre);
 
     imshow("Image originale", imageSource);
 
@@ -181,9 +228,20 @@ int main(int argc, char** argv)
     imshow("Image avec bruit uniforme", imageBruitUniforme);
 
     // affichage des images filtrees avec un filtre moyenneur
-    imshow("Image bruit gaussien filtre moyen", imageBruitGaussienFiltreMoyen);
-    imshow("Image bruit poivre et sel filtre moyen", imageBruitPoivreSelFiltreMoyen);
-    imshow("Image bruit uniforme filtre moyen", imageBruitUniformeFiltreMoyen);
+    // imshow("Image bruit gaussien filtre moyen", imageBruitGaussienFiltreMoyen);
+    // imshow("Image bruit poivre et sel filtre moyen", imageBruitPoivreSelFiltreMoyen);
+    // imshow("Image bruit uniforme filtre moyen", imageBruitUniformeFiltreMoyen);
+    
+    // affichage des images filtrees avec une filtre median
+    imshow("Image bruit gaussien filtre median", imageBruitGaussienFiltreMedian);
+    imshow("Image bruit poivre & sel filtre median", imageBruitPoivreSelFiltreMedian);
+    imshow("Image bruit uniforme filtre median", imageBruitUniformeFiltreMedian);
+    
+    // affichage des images filtrees avec un filtre gaussien
+    // imshow("Image bruit gaussien filtre gaussien", imageBruitGaussienFiltreGaussien);
+    // imshow("Image bruit poivre & sel", imageBruitPoivreSelFiltreGaussien);
+    // imshow("Image bruit uniforme", imageBruitUniformeFiltreGaussien);
+
    
     waitKey(0); // appui d'une touche pour quitter
 
