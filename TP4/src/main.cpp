@@ -84,9 +84,9 @@ Mat filtrage(Mat imageSource, TypeFiltre typeFiltre, int tailleFiltre)
 {
     /* retourne une image filtree a partir du type de filtre et de la taille du filtre en entree */
 
-    Mat imgDest(imageSource.rows, imageSource.cols, CV_8U);
+    Mat imgDest = imageSource.clone();;
     Mat kernel;
-    int sigmaFiltreGaussien = 5;
+    int sigmaFiltreGaussien = 10;
 
     switch(typeFiltre)
     {
@@ -107,65 +107,13 @@ Mat filtrage(Mat imageSource, TypeFiltre typeFiltre, int tailleFiltre)
     return imgDest;
 }
 
-// pas utilise
-float moyenneDuFiltre(Mat imageSource, int ordonnee, int abscisse, int tailleFiltre)
+float calculerErreurQuadratique(Mat imgSource, Mat imgBruitee)
 {
-    /* retourne la moyenne des pixels appartenant a la fenetre du filtre centre sur le pixel (ordonnee, abscisse) */
+    double norme = 0;
 
-    int somme = 0;
-    int compteurPixel = 0;
+    norme = norm(imgSource, imgBruitee, NORM_L2, noArray());
 
-    int ordonneeDepart = ordonnee - (tailleFiltre-1) / 2;
-    int ordonneeArrivee = ordonnee + (tailleFiltre-1) / 2;
-    int abscisseDepart = abscisse - (tailleFiltre-1) / 2;
-    int abscisseArrivee = abscisse + (tailleFiltre-1) / 2;
-
-    for(int i = ordonneeDepart; i < ordonneeArrivee; i++)
-    {
-        if(0 <= i && i < imageSource.rows)
-        {
-            for(int j = abscisseDepart; j < abscisseArrivee; j++)
-            {
-                if( 0 <= j && j < imageSource.cols)
-                {
-                    somme += imageSource.at<uchar>(i, j);
-                    compteurPixel++;
-                }
-            }
-        }
-    }
-
-    return somme / compteurPixel;
-}
-
-// pas utilise
-float medianeDuFiltre(Mat imageSource, int ordonnee, int abscisse, int tailleFiltre)
-{
-    /* retourne la valeur mediane des pixels appartenant a la fenetre du filtre centre sur le pixel (ordonnee, abscisse) */
-
-    int somme = 0;
-    int compteurPixel = 0;
-
-    int ordonneeDepart = ordonnee - (tailleFiltre-1) / 2;
-    int ordonneeArrivee = ordonnee + (tailleFiltre-1) / 2;
-    int abscisseDepart = abscisse - (tailleFiltre-1) / 2;
-    int abscisseArrivee = abscisse + (tailleFiltre-1) / 2;
-
-    for(int i = ordonneeDepart; i < ordonneeArrivee; i++)
-    {
-        if(0 <= i && i < imageSource.rows)
-        {
-            for(int j = abscisseDepart; j < abscisseArrivee; j++)
-            {
-                if( 0 <= j && j < imageSource.cols)
-                {
-                    
-                }
-            }
-        }
-    }
-
-    return somme / compteurPixel;
+    return norme / (imgSource.rows * imgSource.cols);
 }
 
 int main(int argc, char** argv)
@@ -220,27 +168,48 @@ int main(int argc, char** argv)
     imageBruitPoivreSelFiltreGaussien = filtrage(imageBruitPoivreSel, FGAUSSIEN, tailleFiltre);
     imageBruitUniformeFiltreGaussien = filtrage(imageBruitUniforme, FGAUSSIEN, tailleFiltre);
 
-    imshow("Image originale", imageSource);
+    // imshow("Image originale", imageSource);
 
-    // affichage des images bruitees
-    imshow("Image avec bruit gaussien", imageBruitGaussien);
-    imshow("Image avec bruit poivre & sel", imageBruitPoivreSel);
-    imshow("Image avec bruit uniforme", imageBruitUniforme);
+    // ------------- affichage des images bruitees ------------------
+    // imshow("Image avec bruit gaussien", imageBruitGaussien);
+    // imshow("Image avec bruit poivre & sel", imageBruitPoivreSel);
+    // imshow("Image avec bruit uniforme", imageBruitUniforme);
 
-    // affichage des images filtrees avec un filtre moyenneur
+    // ------------- affichage des images filtrees avec un filtre moyenneur -----------------
     // imshow("Image bruit gaussien filtre moyen", imageBruitGaussienFiltreMoyen);
     // imshow("Image bruit poivre et sel filtre moyen", imageBruitPoivreSelFiltreMoyen);
     // imshow("Image bruit uniforme filtre moyen", imageBruitUniformeFiltreMoyen);
     
-    // affichage des images filtrees avec une filtre median
-    imshow("Image bruit gaussien filtre median", imageBruitGaussienFiltreMedian);
-    imshow("Image bruit poivre & sel filtre median", imageBruitPoivreSelFiltreMedian);
-    imshow("Image bruit uniforme filtre median", imageBruitUniformeFiltreMedian);
+    // ------------- affichage des images filtrees avec une filtre median ----------------------
+    // imshow("Image bruit gaussien filtre median", imageBruitGaussienFiltreMedian);
+    // imshow("Image bruit poivre & sel filtre median", imageBruitPoivreSelFiltreMedian);
+    // imshow("Image bruit uniforme filtre median", imageBruitUniformeFiltreMedian);
     
-    // affichage des images filtrees avec un filtre gaussien
+    // ------------- affichage des images filtrees avec un filtre gaussien ---------------------------
     // imshow("Image bruit gaussien filtre gaussien", imageBruitGaussienFiltreGaussien);
-    // imshow("Image bruit poivre & sel", imageBruitPoivreSelFiltreGaussien);
-    // imshow("Image bruit uniforme", imageBruitUniformeFiltreGaussien);
+    // imshow("Image bruit poivre & sel filtre gaussien", imageBruitPoivreSelFiltreGaussien);
+    // imshow("Image bruit uniforme filtre gaussien", imageBruitUniformeFiltreGaussien);
+    
+
+    float erreurBruitGaussien = calculerErreurQuadratique(imageSource, imageBruitGaussien);
+    float erreurBruitGaussienFiltreMoyen = calculerErreurQuadratique(imageSource, imageBruitGaussienFiltreMoyen);
+    float erreurBruitGaussienFiltreMedian = calculerErreurQuadratique(imageSource, imageBruitGaussienFiltreMedian);
+    float erreurBruitGaussienFiltreGaussien = calculerErreurQuadratique(imageSource, imageBruitGaussienFiltreGaussien);
+
+    float erreurBruitPoivreSel = calculerErreurQuadratique(imageSource, imageBruitPoivreSel);
+    float erreurBruitPoivreSelFiltreMoyen = calculerErreurQuadratique(imageSource, imageBruitPoivreSelFiltreMoyen);
+    float erreurBruitPoivreSelFiltreMedian = calculerErreurQuadratique(imageSource, imageBruitPoivreSelFiltreMedian);
+    float erreurBruitPoivreSelFiltreGaussien = calculerErreurQuadratique(imageSource, imageBruitPoivreSelFiltreGaussien);
+
+    cout<<"Erreur bruit gaussien sans filtre : " << erreurBruitGaussien<<endl;
+    cout<<"Erreur bruit gaussien filtre moyen : " << erreurBruitGaussienFiltreMoyen<<endl;
+    cout<<"Erreur bruit gaussien filtre median : " << erreurBruitGaussienFiltreMedian<<endl;
+    cout<<"Erreur bruit gaussien filtre gaussien : " << erreurBruitGaussienFiltreGaussien<<endl<<endl;
+
+    cout<<"Erreur bruit poivre & sel sans filtre : " << erreurBruitPoivreSel<<endl;
+    cout<<"Erreur bruit poivre & sel filtre moyen : " << erreurBruitPoivreSelFiltreMoyen<<endl;
+    cout<<"Erreur bruit poivre & sel filtre median : " << erreurBruitPoivreSelFiltreMedian<<endl;
+    cout<<"Erreur bruit poivre & sel filtre gaussien : " << erreurBruitPoivreSelFiltreGaussien<<endl<<endl;
 
    
     waitKey(0); // appui d'une touche pour quitter
