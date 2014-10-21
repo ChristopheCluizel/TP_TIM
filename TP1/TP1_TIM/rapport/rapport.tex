@@ -1,0 +1,143 @@
+\documentclass{article}
+\usepackage[francais]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{listings}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage[top=3cm,bottom=3cm,left=3cm,right=3cm]{geometry}
+
+\definecolor{colFond}{rgb}{0.8,0.9,0.9}
+\definecolor{hellgelb}{rgb}{1,1,0.8}
+\definecolor{colKeys}{rgb}{0,0,1}
+\definecolor{colIdentifier}{rgb}{0,0,0}
+\definecolor{colComments}{rgb}{0,0.5,0}
+\definecolor{colString}{rgb}{0.62,0.12,0.94}
+
+\lstset{
+	language=c++,
+	float=hbp,
+	basicstyle=\ttfamily\small,
+	identifierstyle=\color{colIdentifier},
+	keywordstyle=\bf \color{colKeys},
+	stringstyle=\color{colString},
+	commentstyle=\color{colComments},
+	columns=flexible,
+	tabsize=3,
+	frame=single,
+	frame=shadowbox,
+	rulesepcolor=\color[gray]{0.5},
+	extendedchars=true,
+	showspaces=false,
+	showstringspaces=false,
+	numbers=left,
+	firstnumber=1,
+	numberstyle=\tiny,
+	breaklines=true,
+	backgroundcolor=\color{hellgelb},
+	captionpos=b,
+}
+
+\title{Compte rendu TP1 \\ Introduction au traitement d'image}
+\author{Alexandre Brehmer \& Christophe Cluizel}
+
+\begin{document}
+ \maketitle
+ \tableofcontents
+ \newpage
+
+ %================ Introduction =================
+ 
+ \section{Introduction}
+ Ce premier TP a pour but d'introduire l'utilisation de Matlab et d'OpenCv pour le traitement de l'image. Matlab est un logiciel de calculs numériques. Dans ce TP, nous utiliserons principalement des opérations sur des matrices, étant donné qu'une image est représentée sous ce format. OpenCv est une bibliothèque écrite en C++ et utilisable en Python et Java. Cette bibliothèque est parfaitement adaptée aux systèmes embarqués, contrairement à Matlab. \\
+ 
+ Dans une première partie, nous nous familiariserons avec Matlab, puis dans un second temps nous prendrons en main OpenCv. 
+ 
+ \subsection{Lecture et visualisation des images}
+ 
+ \textbf{Question 3:}
+ 
+ La commande \emph{image} retranscrit les valeurs de la matrice en 64 niveaux de couleur, les valeurs qui sont supérieures sont ramenées à 64 (figure 1). \emph{imagesc} affiche l'image sur 64 niveaux de couleur, en divisant les 256 niveaux de l'image en 64. C'est pourquoi nous voyons 64 bandes dans le dégradé (figure 2). \\
+ 
+ \begin{figure}[h!]
+	\begin{center}
+	  \includegraphics[width=8cm]{images/TP1_02.eps}
+	\end{center}
+	\caption{Illustration de la commande \emph{image}}
+    \end{figure}
+    
+    \begin{figure}[h!]
+	\begin{center}
+	  \includegraphics[width=8cm]{images/TP1_03.eps}
+	\end{center}
+	\caption{Illustration de la commande \emph{imagesc}}
+    \end{figure}
+    
+  \subsection{La palette de couleurs}
+  \subsubsection{Matlab}
+ 
+ \textbf{Question 9:}
+ 
+ La palette \emph{colormap('gray')} est constituée de 64 niveaux de gris (figure 3). Celle que nous avons créée en possède 256, rendant ainsi le dégradé plus lisse sans que nous puissions discerner les bandes dans le dégradé (figure 4). \\
+ 
+ \begin{figure}[h!]
+    \begin{center}
+	  \includegraphics[width=8cm]{images/TP1_04.eps}
+	\end{center}
+	\caption{Illustration avec la palette de 64 niveaux de gris}
+  \end{figure}
+ 
+  \begin{figure}[h!]
+    \begin{center}
+	  \includegraphics[width=8cm]{images/TP1_06.eps}
+	\end{center}
+	\caption{Illustration avec la palette de 256 niveaux de gris}
+  \end{figure}
+ 
+ \textbf{Question 13:}
+ 
+ La palette associe à chaque valeur de la matrice un code couleur associé. L'affichage d'une image dépend de la palette utilisée.
+ 
+ 
+ \subsubsection{OpenCv}
+ (voir les commentaires dans le source)
+ 
+ 
+ \subsubsection{Conclusion TP1.1}
+  Dans ce TP nous avons pu commencer à prendre en main Matlab associé au traitement des images avec principalement la découverte de l'édition des images et l'utilisation des palettes de couleurs.\\
+  
+  Nous avons ensuite réalisé des opérations sur des images avec OpenCv. Avant cela, nous avons dû apprendre à compiler notre source et linker cette bibliothèque. \newpage
+  
+  
+  \subsection{Calcul sur une image}
+  \subsubsection{Matlab}
+  c.f commentaires dans le code source : \emph{matlab/TP1\_2.m} partie 1.3.1
+  
+  \subsubsection{OpenCv}
+   \textbf{Question 1:}
+      \begin{figure}[h!]
+    \begin{center}
+	  \includegraphics[width=12cm]{images/lenaRGB.png}
+	\end{center}
+	\caption{Canaux de couleur de l'image lena\_color}
+  \end{figure}
+ 
+ On observe que le canal rouge est bien plus présent que les deux autres. Les canaux extrais s'affichent par défault en niveaux de gris, afin d'afficher chaque canal avec la couleur lui correspondant, il nous a fallu créer trois palettes: rouge, verte et bleu.
+  
+  
+  \subsection{Histogramme}
+  \subsubsection{Matlab}
+  c.f commentaires dans le code source : \emph{matlab/TP1\_2.m} partie 1.4.1
+  
+  \subsubsection{OpenCv}
+  La valeur de bin 200 est 146. Cela veut dire qu'il y a 146 pixels possédant la valeur 200 dans l'image en niveaux de gris. On remarque que la valeur 6 est dominante dans l'image, en observant il s'avère qu'il s'agit du bruit sur l'image.
+   \begin{figure}[h]
+    \begin{center}
+	  \includegraphics[width=5cm]{images/HistogrammeOpenCv.png}
+	\end{center}
+	\caption{Histogramme de lena\_gray. 0 à gauche et 255 à droite}
+  \end{figure}
+
+  
+
+ \end{document}
