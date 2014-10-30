@@ -10,7 +10,6 @@ using namespace std;
 enum TypeBruit {GAUSSIEN, POIVRE_SEL, UNIFORME};
 enum TypeFiltre {FMOYEN, FMEDIAN, FGAUSSIEN};
 
-float moyenneDuFiltre(Mat imageSource, int ordonnee, int abscisse, int tailleFiltre);
 Mat generateurDeBruit(Mat imageSource, TypeBruit typeBruit, float quantiteBruit);
 Mat filtrage(Mat imageSource, TypeFiltre typeFiltre, int tailleFiltre);
 
@@ -113,14 +112,11 @@ float calculerErreurQuadratique(Mat imgSource, Mat imgBruitee)
 
     norme = norm(imgSource, imgBruitee, NORM_L2, noArray());
 
-    return norme / (imgSource.rows * imgSource.cols);
+    return (norme / (imgSource.rows * imgSource.cols)) * 100;
 }
 
-int main(int argc, char** argv)
+void repondreQuestion12345(Mat imageSource)
 {
-    
-    Mat imageSource;
-
     Mat imageBruitGaussien;
     Mat imageBruitPoivreSel;
     Mat imageBruitUniforme;
@@ -138,15 +134,6 @@ int main(int argc, char** argv)
     Mat imageBruitUniformeFiltreGaussien;
 
     int tailleFiltre = 3; // nombre impair obligatoire
-
-    srand (time(NULL));
-
-    imageSource = imread("images/lena_gray.tif", IMREAD_GRAYSCALE);
-    if( imageSource.empty())
-    {
-        cout<<"Impossible d'ouvrir l'image"<<endl ;
-        return -1;
-    }
 
     // on genere les images bruitees
     imageBruitGaussien = generateurDeBruit(imageSource, GAUSSIEN, 20);
@@ -210,8 +197,210 @@ int main(int argc, char** argv)
     cout<<"Erreur bruit poivre & sel filtre moyen : " << erreurBruitPoivreSelFiltreMoyen<<endl;
     cout<<"Erreur bruit poivre & sel filtre median : " << erreurBruitPoivreSelFiltreMedian<<endl;
     cout<<"Erreur bruit poivre & sel filtre gaussien : " << erreurBruitPoivreSelFiltreGaussien<<endl<<endl;
+}
 
-   
+void repondreQuestion6()
+{
+    Mat imageBase = Mat::ones(6, 6, CV_32F);
+    float matTemp1[3][3] = {{0, 1, 0}, {1, 1, 1}, {0, 1, 0}};
+    float matTemp2[3][4] = {{0, 1, 1, 0}, {1, 1, 1, 1}, {0, 1, 1, 0}};
+    float matTemp3[4][4] = {{0, 1, 1, 0}, {1, 1, 1, 1}, {1, 1, 1, 1}, {0, 1, 1, 0}};
+    Mat H1 = Mat(3, 3, CV_32F, matTemp1) / 9;
+    Mat H2 = Mat(3, 4, CV_32F, matTemp2) / 12;
+    Mat H3 = Mat(4, 4, CV_32F, matTemp3) / 16;
+
+    Mat resultatH1;
+    Mat resultatH2;
+    Mat resultatH3;
+
+    filter2D(imageBase, resultatH1, -1, H1, Point(-1,-1), 0, BORDER_CONSTANT);
+    filter2D(imageBase, resultatH2, -1, H2, Point(-1,-1), 0, BORDER_CONSTANT);
+    filter2D(imageBase, resultatH3, -1, H3, Point(-1,-1), 0, BORDER_CONSTANT);
+
+    namedWindow("Image originale", WINDOW_NORMAL);
+    imshow("Image originale", imageBase);
+
+    namedWindow("H1 originale", WINDOW_NORMAL);
+    imshow("H1 originale", H1);
+    namedWindow("H2 originale", WINDOW_NORMAL);
+    imshow("H2 originale", H2);
+    namedWindow("H3 originale", WINDOW_NORMAL);
+    imshow("H3 originale", H3);
+
+    namedWindow("Image filtre H1", WINDOW_NORMAL);
+    imshow("Image filtre H1", resultatH1);
+    namedWindow("Image filtre H2", WINDOW_NORMAL);
+    imshow("Image filtre H2", resultatH2);
+    namedWindow("Image filtre H3", WINDOW_NORMAL);
+    imshow("Image filtre H3", resultatH3);
+
+}
+
+int separationHisto3_1(Mat imgSource)
+{
+    Mat hist(1, 256, CV_32F);
+    int vbin = 256; // car 256 classes
+    int histSize[] = {vbin};
+    float vranges[] = {0, 255}; // intervalle que peuvent prendre les valeurs
+    const float * ranges[] = {vranges};
+    int channels[] = {0};
+
+    calcHist(&imgSource, 1, channels, Mat(), hist, 1, histSize, ranges, true, false);
+    int compteurPixel = 0;
+    int nbPixelImage = imgSource.cols * imgSource.rows;
+    int seuil = 0;
+    // cout<<hist<<endl;
+    // cout<<"taille tabHist : "<<hist.size()<<endl;
+    while(compteurPixel < nbPixelImage / 2) // seuil atteint lorsque le diagramme cumule atteint la moitie du nb de pixel total
+    {
+        compteurPixel += hist.at<float>(seuil);
+        seuil++;
+    }
+    cout<<"Nombre de pixel lorsque le seuil est atteint : "<<compteurPixel<<endl;
+
+    // pour verifier que l'histogramme est bon en retrouvant le nombre total de pixel
+    // int temp = 0;
+    // for(int j = 0; j < 256; j++)
+    // {
+    //     temp += hist.at<float>(j);
+    //     // cout<<temp<<endl;
+    // }
+
+    cout<<"nombre pixel total de l'image : "<<nbPixelImage<<endl;
+
+    return seuil;
+}
+
+float calculProportionRelative(Mat histNormalise, int seuil)
+{
+    float proportion = 0;
+
+    for(int i = 0; i < seuil; i++)
+    {
+        proportion += histNormalise.at<float>(i);
+    }
+
+    return proportion;
+}
+
+float calculMu(Mat histNormalise, int borneInf, int borneSup, float q)
+{
+    float somme = 0;
+
+    for(int i = borneInf; i <= borneSup; i++)
+    {
+        somme += i * histNormalise.at<float>(i);
+    }
+    if(q == 0)
+        return 10^10;
+    else
+        return somme / q;
+}
+
+float calculSigmaCarre(Mat histNormalise, int borneInf, int borneSup, float q, float mu)
+{
+    float somme = 0;
+
+    for(int i = borneInf; i <= borneSup; i++)
+    {
+        somme += ((i - mu)*(i-mu)) * histNormalise.at<float>(i);
+    }
+    if(q == 0)
+        return 10^10;
+    else
+        return somme / q;
+}
+
+int minimumTab(float tab[])
+{
+    int indexMini = 0;
+
+    for(int i = 0; i < 256; i++)
+    {
+        if(tab[i] < tab[indexMini])
+            indexMini = i;
+    }
+ 
+    return indexMini;
+}
+
+int separationHisto3_3(Mat imgSource)
+{
+
+    Mat hist(1, 256, CV_32F);
+    Mat histNormalise(1, 256, CV_32F);
+
+    int vbin = 256;
+    int histSize[] = {vbin};
+    float vranges[] = {0, 255};
+    const float * ranges[] = {vranges};
+    int channels[] = {0};
+    int nbPixelTotal = imgSource.rows * imgSource.cols;
+    int seuil = 0;
+    float tabVarianceIntraClasse[256];
+    float q1 = 0, q2 = 0, mu1 = 0, mu2 = 0, sigma1carre = 0, sigma2carre = 0;
+
+    calcHist(&imgSource, 1, channels, Mat(), hist, 1, histSize, ranges, true, false);
+    histNormalise = hist / nbPixelTotal;
+    // cout<<histNormalise<<endl;
+    for(int i = 0; i < 256; i++)
+    {
+        q1 = calculProportionRelative(histNormalise, i);
+        q2 = 1 - q1;
+        mu1 = calculMu(histNormalise, 0, i, q1);
+        mu2 = calculMu(histNormalise, i + 1, 255, q2);
+        sigma1carre = calculSigmaCarre(histNormalise, 0, i, q1, mu1);
+        sigma2carre = calculSigmaCarre(histNormalise, i + 1, 255, q2, mu2);
+        tabVarianceIntraClasse[i] = q1 * sigma1carre + q2 * sigma2carre;
+
+        cout<<"i : "<<i<<" | q1 : "<<q1<<" | q2 : "<<q2<<" | mu1 : "<<mu1<<" | mu2 : "<<mu2<<" | sigma1Carre : "<<sigma1carre<<" | sigma2Carre : "<<sigma2carre<<" | varianceIntraClasse : "<<tabVarianceIntraClasse[i]<<endl;
+    }
+
+    seuil = minimumTab(tabVarianceIntraClasse);
+
+    return seuil;
+}
+
+int main(int argc, char** argv)
+{   
+    Mat imageSource;
+    Mat imageBinariseeSeuilPremiereApproche;
+    Mat imageBinariseeSeuilOtsu;
+    Mat imageBinariseeSeuilOtsuReel;
+    int seuilPremiereApproche = 0;
+    int seuilOtsu = 0;
+
+
+    srand (time(NULL));
+
+    // imageSource = imread("images/lena_gray.tif", IMREAD_GRAYSCALE);
+    imageSource = imread("images/pomme.jpg", IMREAD_GRAYSCALE);
+    if( imageSource.empty())
+    {
+        cout<<"Impossible d'ouvrir l'image"<<endl ;
+        return -1;
+    }
+
+    // repondreQuestion12345(imageSource);
+    // repondreQuestion6();
+    
+    /* ------------------- Binarisation -------------------- */
+
+    // seuilPremiereApproche = separationHisto3_1(imageSource);
+    // cout<<"Seuil premiere approche : "<<seuilPremiereApproche<<endl;
+
+    // threshold(imageSource, imageBinariseeSeuilPremiereApproche, seuilPremiereApproche, 255, THRESH_BINARY);
+    // imshow("Image binarisee seuil premiere approche", imageBinariseeSeuilPremiereApproche);
+
+    seuilOtsu = separationHisto3_3(imageSource);
+    cout<<"Seuil avec methode Otsu : "<<seuilOtsu<<endl;
+
+    threshold(imageSource, imageBinariseeSeuilOtsu, seuilOtsu, 255, THRESH_BINARY);
+    imshow("Image binarisee seuil methode Otsu a la main", imageBinariseeSeuilOtsu);
+
+    threshold(imageSource, imageBinariseeSeuilOtsuReel, 0, 255, THRESH_BINARY | THRESH_OTSU);
+    imshow("Image binarisee seuil methode Otsu d'OpenCv", imageBinariseeSeuilOtsuReel);
+    
     waitKey(0); // appui d'une touche pour quitter
 
     return 0;
