@@ -353,7 +353,7 @@ int separationHisto3_3(Mat imgSource)
         sigma2carre = calculSigmaCarre(histNormalise, i + 1, 255, q2, mu2);
         tabVarianceIntraClasse[i] = q1 * sigma1carre + q2 * sigma2carre;
 
-        cout<<"i : "<<i<<" | q1 : "<<q1<<" | q2 : "<<q2<<" | mu1 : "<<mu1<<" | mu2 : "<<mu2<<" | sigma1Carre : "<<sigma1carre<<" | sigma2Carre : "<<sigma2carre<<" | varianceIntraClasse : "<<tabVarianceIntraClasse[i]<<endl;
+        // cout<<"i : "<<i<<" | q1 : "<<q1<<" | q2 : "<<q2<<" | mu1 : "<<mu1<<" | mu2 : "<<mu2<<" | sigma1Carre : "<<sigma1carre<<" | sigma2Carre : "<<sigma2carre<<" | varianceIntraClasse : "<<tabVarianceIntraClasse[i]<<endl;
     }
 
     seuil = minimumTab(tabVarianceIntraClasse);
@@ -373,24 +373,25 @@ int main(int argc, char** argv)
 
     srand (time(NULL));
 
-    // imageSource = imread("images/lena_gray.tif", IMREAD_GRAYSCALE);
-    imageSource = imread("images/pomme.jpg", IMREAD_GRAYSCALE);
+    imageSource = imread("images/lena_gray.tif", IMREAD_GRAYSCALE);
+    // imageSource = imread("images/cible_couleur.jpg", IMREAD_GRAYSCALE);
     if( imageSource.empty())
     {
         cout<<"Impossible d'ouvrir l'image"<<endl ;
         return -1;
     }
 
-    // repondreQuestion12345(imageSource);
-    // repondreQuestion6();
+    repondreQuestion12345(imageSource);
+    repondreQuestion6();
     
     /* ------------------- Binarisation -------------------- */
 
-    // seuilPremiereApproche = separationHisto3_1(imageSource);
-    // cout<<"Seuil premiere approche : "<<seuilPremiereApproche<<endl;
+    seuilPremiereApproche = separationHisto3_1(imageSource);
+    cout<<"Seuil premiere approche : "<<seuilPremiereApproche<<endl;
 
-    // threshold(imageSource, imageBinariseeSeuilPremiereApproche, seuilPremiereApproche, 255, THRESH_BINARY);
-    // imshow("Image binarisee seuil premiere approche", imageBinariseeSeuilPremiereApproche);
+    // seuilPremiereApproche = 48;
+    threshold(imageSource, imageBinariseeSeuilPremiereApproche, seuilPremiereApproche, 255, THRESH_BINARY);
+    imshow("Image binarisee seuil premiere approche", imageBinariseeSeuilPremiereApproche);
 
     seuilOtsu = separationHisto3_3(imageSource);
     cout<<"Seuil avec methode Otsu : "<<seuilOtsu<<endl;
