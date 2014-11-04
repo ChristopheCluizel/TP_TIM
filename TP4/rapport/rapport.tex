@@ -1,0 +1,286 @@
+\documentclass{article}
+\usepackage[francais]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{listings}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage[top=3cm,bottom=3cm,left=3cm,right=3cm]{geometry}
+
+\definecolor{colFond}{rgb}{0.8,0.9,0.9}
+\definecolor{hellgelb}{rgb}{1,1,0.8}
+\definecolor{colKeys}{rgb}{0,0,1}
+\definecolor{colIdentifier}{rgb}{0,0,0}
+\definecolor{colComments}{rgb}{0,0.5,0}
+\definecolor{colString}{rgb}{0.62,0.12,0.94}
+
+\lstset{
+	language=c++,
+	float=hbp,
+	basicstyle=\ttfamily\small,
+	identifierstyle=\color{colIdentifier},
+	keywordstyle=\bf \color{colKeys},
+	stringstyle=\color{colString},
+	commentstyle=\color{colComments},
+	columns=flexible,
+	tabsize=3,
+	frame=single,
+	frame=shadowbox,
+	rulesepcolor=\color[gray]{0.5},
+	extendedchars=true,
+	showspaces=false,
+	showstringspaces=false,
+	numbers=left,
+	firstnumber=1,
+	numberstyle=\tiny,
+	breaklines=true,
+	backgroundcolor=\color{hellgelb},
+	captionpos=b,
+}
+
+\title{Compte rendu TP4 \\ Filtrage et binarisation}
+\author{Alexandre Brehmer \& Christophe Cluizel}
+
+\begin{document}
+ \maketitle
+ \tableofcontents
+ \newpage
+
+ %================ Introduction =================
+ 
+ \section{Introduction}
+ Ce TP a pour but d'introduire et de nous familiariser avec les traitements de filtrage et de binarisation avec la bibliothèque OpenCv.\\
+ 
+ Dans une première partie, nous appliquerons différents filtres sur des images après leur avoir ajouté du bruit. Puis nous implémenterons 2 méthodes de choix de seuil pour binariser automatiquement une image. 
+ 
+ %================ Filtrage =================
+ \section{Filtrage}
+
+ %---------- Génération du bruit ------------------
+ \subsection{Génération de bruit}
+ Afin d'appliquer plusieurs types de filtre sur des images, nous commençons par leur ajouter du bruit. Trois types de bruit peuvent être ajouter :
+ \begin{itemize}
+ 	\item un bruit Gaussien, régi par son écart-type
+ 	\item un bruit Poivre et Sel régi par le pourcentage de couverture de l'image
+ 	\item un bruit uniforme qui ne prend pas de paramètre
+ \end{itemize}
+
+ \begin{lstlisting}
+switch(typeBruit)
+{
+    case GAUSSIEN:
+        for(int i = 0; i < imgDest.rows; i++)
+        {
+            for(int j = 0; j < imgDest.cols; j++)
+            {
+                bruit = AWGN_generator(quantiteBruit); // genere un nombre suivant une loi normale de moyenne 0 et d'ecart type quantiteBruit
+                pixel = imageSource.at<uchar>(i, j); // recupere la valeur du pixel de l'image a la position (i,j)
+
+                if(bruit + pixel > 255) // pour eviter de depasser la valeur max en niveaux de gris d'un pixel
+                {
+                    imgDest.at<uchar>(i, j) = 255;
+                }
+                else if(bruit + pixel < 0)
+                {
+                    imgDest.at<uchar>(i, j) = 0;
+                }
+                else
+                    imgDest.at<uchar>(i, j) = pixel + bruit;    // ajout du bruit gaussien a la valeur du pixel
+            }
+        }
+    break;
+
+    case POIVRE_SEL:
+        for(int i = 0; i < imgDest.rows; i++)
+        {
+            for(int j = 0; j < imgDest.cols; j++)
+            {
+                pixel = imgDest.at<uchar>(i, j);
+                bruit = (rand() % 2) * 255; // prend la valeur 0 ou 255 avec une proba de 0.5
+
+                if(rand() % 101 <= quantiteBruit)
+                {
+                        imgDest.at<uchar>(i, j) = bruit;
+                }
+            }
+        }
+    break;
+
+    case UNIFORME:
+        for(int i = 0; i < imgDest.rows; i++)
+        {
+            for(int j = 0; j < imgDest.cols; j++)
+            {
+                bruit = rand() % 256;   // genere un nb aleatoire entre 0 et 255
+                pixel = imgDest.at<uchar>(i, j);
+
+                if(pixel + bruit < 255)
+                    imgDest.at<uchar>(i, j) = pixel + bruit;
+            }
+        }
+    break;
+}
+ \end{lstlisting}
+
+ Nous obtenons les images bruitées suivantes.
+
+ TODO
+ 
+ %---------- Filtrage moyen ------------------
+ \subsection{Filtrage moyen}
+ Le filtre moyen utilise la fonction d'OpenCV appelée \emph{filter2D}. Cette fonction applique une convolution entre l'image et un kernel définit au préalable.\\
+
+ \begin{lstlisting}
+kernel = Mat::ones(tailleFiltre, tailleFiltre, CV_32F) / (float)(tailleFiltre * tailleFiltre); // creation du kernel. Matrice avec 1 partout et coeff devant
+filter2D(imageSource, imgDest, -1, kernel, Point(-1,-1), 0, BORDER_DEFAULT); // application du kernel
+ \end{lstlisting}
+
+ Nous obtenons les images filtrées suivantes :
+
+ TODO
+
+
+ %---------- Filtrage median ------------------
+ \subsection{Filtrage médian}
+ Plus simplement, le filtre médian utilise la fonction \emph{medianBlur} d'OpenCv.\\
+
+ \begin{lstlisting}
+medianBlur(imageSource, imgDest, tailleFiltre);
+ \end{lstlisting}
+
+ Nous obtenons les images filtrées suivantes :
+
+ TODO
+
+%---------- Filtrage gaussien ------------------
+ \subsection{Filtrage gaussien}
+ Et le filtre Gaussien utilise la fonction \emph{GaussianBlur}.
+
+\begin{lstlisting}
+GaussianBlur(imageSource, imgDest, Size(tailleFiltre, tailleFiltre), sigmaFiltreGaussien, 0, BORDER_DEFAULT);
+ \end{lstlisting} 
+
+ Nous obtenons les images filtrées suivantes :
+
+ TODO
+
+%---------- Analyse comparative ------------------
+ \subsection{Analyse comparative}
+ Pour observer l'efficacité des filtres sur les types de bruit Gaussien et Poivre\&Sel, nous avons calculé l'erreur quadratique moyenne entre l'image d'origine et l'image filtrée.\\
+
+ \begin{lstlisting}
+float calculerErreurQuadratique(Mat imgSource, Mat imgBruitee)
+{
+    double norme = 0;
+
+    norme = norm(imgSource, imgBruitee, NORM_L2, noArray());
+
+    return (norme / (imgSource.rows * imgSource.cols)) * 100;
+}
+ \end{lstlisting} 
+
+ Nous obtenons les résultats suivant : 
+
+ TODO afficher les résultats !!!!!!!!!!!!!
+
+%---------- Filtrage pair et filtrage impair ------------------
+ \subsection{Filtrage pair et filtrage impair}
+ Cette partie a pour but de montrer pourquoi la taille des filtres (kernel) doivent être toujours impaires. Pour cela, nous créons des kernels de taille paire et impaire que nous appliquons à une image pour observer leurs effets. \\
+
+ \begin{lstlisting}
+Mat imageBase = Mat::ones(6, 6, CV_32F);
+float matTemp1[3][3] = {{0, 1, 0}, {1, 1, 1}, {0, 1, 0}};
+float matTemp2[3][4] = {{0, 1, 1, 0}, {1, 1, 1, 1}, {0, 1, 1, 0}};
+float matTemp3[4][4] = {{0, 1, 1, 0}, {1, 1, 1, 1}, {1, 1, 1, 1}, {0, 1, 1, 0}};
+Mat H1 = Mat(3, 3, CV_32F, matTemp1) / 9;
+Mat H2 = Mat(3, 4, CV_32F, matTemp2) / 12;
+Mat H3 = Mat(4, 4, CV_32F, matTemp3) / 16;
+
+Mat resultatH1;
+Mat resultatH2;
+Mat resultatH3;
+
+filter2D(imageBase, resultatH1, -1, H1, Point(-1,-1), 0, BORDER_CONSTANT);
+filter2D(imageBase, resultatH2, -1, H2, Point(-1,-1), 0, BORDER_CONSTANT);
+filter2D(imageBase, resultatH3, -1, H3, Point(-1,-1), 0, BORDER_CONSTANT);
+ \end{lstlisting} 
+
+Nous obtenons les images suivantes : 
+
+TODO AFFICHER LES IMAGES
+
+
+ %================ Binarisation =================
+ \section{Binarisation}
+
+ %---------- Méthode de la moitié des pixels ------------------
+ \subsection{Séparation de l'histogramme : méthode de la moitié des pixels}
+ Pour pouvoir utiliser cette méthode, il faut tout d'abord obtenir l'histogramme de l'image à binariser. On utilise pour cela la fonction d'OpenCV appelée \emph{calcHist}. Celle-ci retourne une matrice contenant le nombre de pixel pour chaque valeur de niveaux de gris.\\
+
+ \begin{lstlisting}
+Mat hist(1, 256, CV_32F);
+int vbin = 256; // car 256 classes
+int histSize[] = {vbin};
+float vranges[] = {0, 255}; // intervalle que peuvent prendre les valeurs
+const float * ranges[] = {vranges};
+int channels[] = {0};
+
+calcHist(&imgSource, 1, channels, Mat(), hist, 1, histSize, ranges, true, false);
+\end{lstlisting}
+
+ Cette méthode permet d'obtenir automatiquement un seuil de binarisation."Le seuil est obtenu lorsque l'histogramme cumulé de l'image atteint une certaine valeur correspondant à la moitié du nombre de pixels présents dans l'images." On créé donc un compteur qui parcourt l'histogramme en s'incrémentant pour chaque valeur de niveaux de gris. Une fois ce compteur atteignant la moitié du nombre de pixels dans l'image, nous obtenons le seuil.\\
+
+ \begin{lstlisting}
+while(compteurPixel < nbPixelImage / 2) // seuil atteint lorsque le diagramme cumule atteint la moitie du nb de pixel total
+{
+    compteurPixel += hist.at<float>(seuil);
+    seuil++;
+}
+ \end{lstlisting}
+
+Une fois le seuil détecté, nous utilisons la fonction \emph{treshold} qui passe tous les pixels ayant une valeur inférieure au seuil à 0 et tous les pixels ayant une valeur supérieure au seuil à 255.
+ Avec cette méthode, nous obtenons l'image binarisée suivante : figure ???
+
+ TODO AFFICHER L'IMAGE
+
+
+%---------- Méthode Otsu ------------------
+ \subsection{Séparation de l'histogramme : méthode d'Otsu}
+ Cette méthode est basée sur une séparation d'histogramme en 2 à partir de la moyenne et de la variance. C'est une méthode incrémentale.\\
+
+ Pour chacune des 256 niveaux de gris il faut :
+ \begin{enumerate}
+ 	\item calculer la proportion de pixels dans la partie de l'histogramme avant le seuil
+ 	\item faire de même pour la partie après le seuil
+ 	\item calculer la moyenne pour chacune des 2 parties de l'histogramme
+ 	\item calculer la variance pour chacune des 2 parties de l'histogramme
+ 	\item calculer la variances intra-classe
+ \end{enumerate}
+ Nous obtenons alors un tableau de 256 valeurs de variances intra-classe. La valeur du seuil correspond à la valeur minimum de la variance intra-classe.\\
+
+ \begin{lstlisting}
+for(int i = 0; i < 256; i++)
+{
+    q1 = calculProportionRelative(histNormalise, i);
+    q2 = 1 - q1;
+    mu1 = calculMu(histNormalise, 0, i, q1);
+    mu2 = calculMu(histNormalise, i + 1, 255, q2);
+    sigma1carre = calculSigmaCarre(histNormalise, 0, i, q1, mu1);
+    sigma2carre = calculSigmaCarre(histNormalise, i + 1, 255, q2, mu2);
+    tabVarianceIntraClasse[i] = q1 * sigma1carre + q2 * sigma2carre;
+}
+seuil = minimumTab(tabVarianceIntraClasse);
+ \end{lstlisting}
+
+ Nous obtenons alors l'image binarisée suivant : figure ???????
+
+ TODO AFFICHER L'IMAGE
+
+ \end{document}
+
+ % \begin{figure}[h!]
+	% \begin{center}
+	%   \includegraphics[width=8cm]{images/TP1_02.eps}
+	% \end{center}
+	% \caption{Illustration de la commande \emph{image}}
+ %    \end{figure}

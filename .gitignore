@@ -4,3 +4,6 @@
 *.eps
 *.jpg
 *.o
+*.toc
+*.log
+*.aux
