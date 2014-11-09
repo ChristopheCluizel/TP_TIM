@@ -374,7 +374,6 @@ int main(int argc, char** argv)
     srand (time(NULL));
 
     imageSource = imread("images/lena_gray.tif", IMREAD_GRAYSCALE);
-    // imageSource = imread("images/cible_couleur.jpg", IMREAD_GRAYSCALE);
     if( imageSource.empty())
     {
         cout<<"Impossible d'ouvrir l'image"<<endl ;
@@ -389,7 +388,6 @@ int main(int argc, char** argv)
     seuilPremiereApproche = separationHisto3_1(imageSource);
     cout<<"Seuil premiere approche : "<<seuilPremiereApproche<<endl;
 
-    // seuilPremiereApproche = 48;
     threshold(imageSource, imageBinariseeSeuilPremiereApproche, seuilPremiereApproche, 255, THRESH_BINARY);
     imshow("Image binarisee seuil premiere approche", imageBinariseeSeuilPremiereApproche);
 

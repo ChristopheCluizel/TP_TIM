@@ -124,7 +124,11 @@ switch(typeBruit)
 
  Nous obtenons les images bruitées suivantes.
 
- TODO
+\begin{figure}[h!]
+   \centering
+   \caption{Bruit gaussien, Bruit poivre et sel et Bruit uniforme}
+   \includegraphics[width=17cm]{images/bruits.png}
+\end{figure}
  
  %---------- Filtrage moyen ------------------
  \subsection{Filtrage moyen}
@@ -137,7 +141,11 @@ filter2D(imageSource, imgDest, -1, kernel, Point(-1,-1), 0, BORDER_DEFAULT); // 
 
  Nous obtenons les images filtrées suivantes :
 
- TODO
+\begin{figure}[h!]
+   \centering
+   \caption{Application d'un filtre moyen sur des images bruitée (gaussien, poivre et sel et uniforme)}
+   \includegraphics[width=17cm]{images/filtreMoyen.png}
+\end{figure}
 
 
  %---------- Filtrage median ------------------
@@ -150,7 +158,11 @@ medianBlur(imageSource, imgDest, tailleFiltre);
 
  Nous obtenons les images filtrées suivantes :
 
- TODO
+\begin{figure}[h!]
+   \centering
+   \caption{Application d'un filtre médian sur des images bruitée (gaussien, poivre et sel et uniforme)}
+   \includegraphics[width=17cm]{images/filtreMedian.png}
+\end{figure}
 
 %---------- Filtrage gaussien ------------------
  \subsection{Filtrage gaussien}
@@ -162,7 +174,11 @@ GaussianBlur(imageSource, imgDest, Size(tailleFiltre, tailleFiltre), sigmaFiltre
 
  Nous obtenons les images filtrées suivantes :
 
- TODO
+\begin{figure}[h!]
+   \centering
+   \caption{Application d'un filtre gaussien sur des images bruitée (gaussien, poivre et sel et uniforme)}
+   \includegraphics[width=17cm]{images/filtreGaussien.png}
+\end{figure}
 
 %---------- Analyse comparative ------------------
  \subsection{Analyse comparative}
@@ -179,10 +195,22 @@ float calculerErreurQuadratique(Mat imgSource, Mat imgBruitee)
 }
  \end{lstlisting} 
 
- Nous obtenons les résultats suivant : 
+ Nous obtenons les résultats suivants : 
+ 
+ \begin{lstlisting}
+Erreur bruit gaussien sans filtre : 3.69085
+Erreur bruit gaussien filtre moyen : 1.56964
+Erreur bruit gaussien filtre median : 1.78817
+Erreur bruit gaussien filtre gaussien : 1.56804
 
- TODO afficher les résultats !!!!!!!!!!!!!
+Erreur bruit poivre & sel sans filtre : 9.63757
+Erreur bruit poivre & sel filtre moyen : 3.71262
+Erreur bruit poivre & sel filtre median : 0.925274
+Erreur bruit poivre & sel filtre gaussien : 3.71213 \\
+ \end{lstlisting} 
 
+ De façon générale, il ressort que les filtres gaussien et médian apportent de meilleurs résultats de filtrage. Pour le bruit Poivre\&Sel, le filtre médian est beaucoup plus efficace que les deux autres.
+ 
 %---------- Filtrage pair et filtrage impair ------------------
  \subsection{Filtrage pair et filtrage impair}
  Cette partie a pour but de montrer pourquoi la taille des filtres (kernel) doivent être toujours impaires. Pour cela, nous créons des kernels de taille paire et impaire que nous appliquons à une image pour observer leurs effets. \\
@@ -205,9 +233,22 @@ filter2D(imageBase, resultatH2, -1, H2, Point(-1,-1), 0, BORDER_CONSTANT);
 filter2D(imageBase, resultatH3, -1, H3, Point(-1,-1), 0, BORDER_CONSTANT);
  \end{lstlisting} 
 
-Nous obtenons les images suivantes : 
+Les kernels donnent l'image suivante :
+\begin{figure}[h!]
+   \centering
+   \caption{Kernels utilisés pour les filtres}
+   \includegraphics[width=16cm]{images/filtres_pair_impair.png}
+\end{figure}
 
-TODO AFFICHER LES IMAGES
+Nous appliquons ces kernels pour filtrer une image totalement blanche à l'origine. Nous obtenons ensuite les images filtrées suivantes : 
+
+\begin{figure}[h!]
+   \centering
+   \caption{Images filtrées avec les kernels précédents}
+   \includegraphics[width=16cm]{images/imagesFiltrees_pair_impair.png}
+\end{figure}
+
+Nous pouvons observer qu'un filtre pair déforme l'image originale, car nous perdons la symétrie. C'est pourquoi il faut utiliser un filtre impair pour ne pas déformer l'image originale.
 
 
  %================ Binarisation =================
@@ -239,9 +280,13 @@ while(compteurPixel < nbPixelImage / 2) // seuil atteint lorsque le diagramme cu
  \end{lstlisting}
 
 Une fois le seuil détecté, nous utilisons la fonction \emph{treshold} qui passe tous les pixels ayant une valeur inférieure au seuil à 0 et tous les pixels ayant une valeur supérieure au seuil à 255.
- Avec cette méthode, nous obtenons l'image binarisée suivante : figure ???
+ Avec cette méthode, nous obtenons l'image binarisée suivante : 
 
- TODO AFFICHER L'IMAGE
+ \begin{figure}[h!]
+   \centering
+   \caption{Binarisation par la méthode de la moitié des pixels}
+   \includegraphics[width=8cm]{images/binarisee.png}
+\end{figure}
 
 
 %---------- Méthode Otsu ------------------
@@ -272,15 +317,12 @@ for(int i = 0; i < 256; i++)
 seuil = minimumTab(tabVarianceIntraClasse);
  \end{lstlisting}
 
- Nous obtenons alors l'image binarisée suivant : figure ???????
+ Nous obtenons alors l'image binarisée suivante : 
 
- TODO AFFICHER L'IMAGE
+ \begin{figure}[h!]
+   \centering
+   \caption{Binarisation par la méthode d'Otsu}
+   \includegraphics[width=8cm]{images/Otsu.png}
+\end{figure}
 
  \end{document}
-
- % \begin{figure}[h!]
-	% \begin{center}
-	%   \includegraphics[width=8cm]{images/TP1_02.eps}
-	% \end{center}
-	% \caption{Illustration de la commande \emph{image}}
- %    \end{figure}
