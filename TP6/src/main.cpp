@@ -282,29 +282,44 @@ int main(int argc, char* argv[])
 	// imshow("Gradient symetrise logoInsa", logoInsaGradientSymetrise);
 	
 	/* ============== Ouverture ============== */
-	//imshow("logoInsa ouverture", ouvertureImage(logoInsa, 3, RECT));
+	// imshow("logoInsa ouverture", ouvertureImage(logoInsa, 3, RECT));
 
 	/* ============== Fermeture ============== */
-	//imshow("logoInsa fermeture", fermetureImage(logoInsa, 3, RECT));
+	// imshow("logoInsa fermeture", fermetureImage(logoInsa, 3, RECT));
+	
+	/* ============== TopHat ============== */
+	// imshow("logoInsa topHat", topHatImage(logoInsa, 3, RECT));
+
+	/* ============== BottomHat ============== */
+	// imshow("logoInsa bottomHat", bottomHatImage(logoInsa, 3, RECT));
+	
+	// cvWaitKey();
 	
 	/* ============== Application ============== */
-	Mat timber = imread("image/timber1.jpg", 1);
+	Mat timber = imread("image/road2.jpg", 1);
+	Mat timberNB = imread("image/road2.jpg", 0);
 	Mat imgHSV;
 	Mat imgThresh;
 
 	setwindowSettings();
 
-	imshow("Image originale", timber);
+	// imshow("Image originale", timber);
   	cvtColor(timber, imgHSV, CV_BGR2HSV); //Change the color format from BGR to HSV
 
   	while(true)
   	{
 	  	imgThresh = getThresholdedImage(imgHSV);
+	  	// imshow("Image binarisee", imgThresh);
+	  	// imshow("Image N&B", timberNB);
 	  	imgThresh = fermetureImage(imgThresh, 3, CROSS);
 	  	imgThresh = ouvertureImage(imgThresh, 3, CROSS);
 
 	  	subtract(dilaterImage(imgThresh, 3, RECT), eroderImage(imgThresh, 3, RECT), imgThresh);
-	  	imshow("Image binarisee", imgThresh);
+	  	imshow("Image contour", imgThresh);
+
+	  	Mat imgAvecFondu;
+	  	bitwise_or(timberNB, imgThresh, imgAvecFondu);
+	  	imshow("Image avec contour fondu", imgAvecFondu);
 
 		int c = cvWaitKey(80);
   		if((char)c==27 ) break;	//If 'ESC' is pressed, break the loop
