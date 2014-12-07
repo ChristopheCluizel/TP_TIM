@@ -16,33 +16,6 @@ int upperH=180;
 int upperS=256;
 int upperV=256;
 
-
-void repondreQuestion1()
-{
-	Mat I1 = Mat(7, 7, CV_32F, Scalar(1));
-	I1.at<uchar>(1,1) = 0;
-	I1.at<uchar>(1,2) = 0;
-	I1.at<uchar>(1,4) = 0;
-	I1.at<uchar>(1,5) = 0;
-	I1.at<uchar>(3,1) = 0;
-	I1.at<uchar>(3,2) = 0;
-	I1.at<uchar>(3,4) = 0;
-	I1.at<uchar>(3,5) = 0;
-	I1.at<uchar>(6,2) = 0;
-	I1.at<uchar>(6,3) = 0;
-	uchar tabI1[3][3] = {{0, 1, 0}, {1, 1, 1}, {0, 1, 0}};
-	Mat S1 = Mat(3, 3, CV_32F, tabI1);
-	Mat I1Dilate;
-
-	dilate(I1, I1Dilate, MORPH_RECT);
-
-    namedWindow("I1", WINDOW_NORMAL);
-    imshow("I1", I1);
-    namedWindow("I1 dilate", WINDOW_NORMAL);
-    imshow("I1 dilate", I1Dilate);
-
-}
-
 Mat creerImageNoireAvecCarreBlanc()
 {
 	Mat squares(301, 301, CV_8U, Scalar::all(0));
@@ -296,8 +269,8 @@ int main(int argc, char* argv[])
 	// cvWaitKey();
 	
 	/* ============== Application ============== */
-	Mat timber = imread("image/road2.jpg", 1);
-	Mat timberNB = imread("image/road2.jpg", 0);
+	Mat timber = imread("image/timber1.jpg", 1);
+	Mat timberNB = imread("image/timber1.jpg", 0);
 	Mat imgHSV;
 	Mat imgThresh;
 
