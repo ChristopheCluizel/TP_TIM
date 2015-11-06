@@ -26,7 +26,7 @@ int upperH=180;
 int upperS=256;
 int upperV=256;
 
-void setwindowSettings()
+setwindowSettings()
 {
 	cvNamedWindow("TrackbarsLine", CV_WINDOW_AUTOSIZE);
 	cvNamedWindow("TrackbarsCircle", CV_WINDOW_AUTOSIZE);
@@ -100,7 +100,7 @@ Mat fermetureImage(Mat image, int taille, ElementStructurant elementStructurant)
 	morphologyEx(image, dest, MORPH_CLOSE, kernel, Point(-1,-1), 1);
 	return dest;
 }
-
+imread(
 //This function threshold the HSV image and create a binary image
 Mat getThresholdedImage(Mat imgHSV)
 {

@@ -62,7 +62,6 @@ Mat eroderImage(Mat image, int taille, ElementStructurant elementStructurant)
 			kernel = getStructuringElement(MORPH_CROSS, Size(taille, taille));
 		break;
 	}
-	
 	erode(image, dest, kernel);
 	return dest;
 }
